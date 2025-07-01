@@ -1,0 +1,1 @@
+NODE_52_kosovo.fasta	NODE_2_unknown.fasta	99.9815	7	8

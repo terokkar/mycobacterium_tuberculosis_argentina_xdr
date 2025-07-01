@@ -1,0 +1,7 @@
+- "left reads":
+  - "/Users/weeblesthe2nd/mtb_argentina_mdr/fastp/ERR14936891_trimmed_1.fastq"
+  "number": !!int "1"
+  "orientation": "fr"
+  "right reads":
+  - "/Users/weeblesthe2nd/mtb_argentina_mdr/fastp/ERR14936891_trimmed_2.fastq"
+  "type": "paired-end"

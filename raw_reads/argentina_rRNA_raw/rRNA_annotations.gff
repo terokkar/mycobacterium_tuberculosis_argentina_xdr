@@ -1,0 +1,4 @@
+##gff-version 3
+NODE_46_length_19018_cov_90.910592	barrnap:0.9	rRNA	2363	3891	0	+	.	Name=16S_rRNA;product=16S ribosomal RNA
+NODE_46_length_19018_cov_90.910592	barrnap:0.9	rRNA	4172	7300	0	+	.	Name=23S_rRNA;product=23S ribosomal RNA
+NODE_46_length_19018_cov_90.910592	barrnap:0.9	rRNA	7414	7489	1.3e-09	+	.	Name=5S_rRNA;product=5S ribosomal RNA (partial);note=aligned only 63 percent of the 5S ribosomal RNA

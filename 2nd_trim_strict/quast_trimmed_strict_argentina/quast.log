@@ -1,0 +1,66 @@
+/Users/weeblesthe2nd/miniconda3/envs/genomeanalysis/bin/quast.py spadesout_trimmed_strict/scaffolds.fasta -o quast_trimmed_strict_argentina -t 8
+
+Version: 5.3.0
+
+System information:
+  OS: macOS-15.5-x86_64-i386-64bit-Mach-O (macosx)
+  Python version: 3.13.2
+  CPUs number: 10
+
+Started: 2025-06-03 12:39:42
+
+Logging to /Users/weeblesthe2nd/mtb_argentina_mdr/quast_trimmed_strict_argentina/quast.log
+WARNING: Maximum number of threads is reset to 1 to prevent the crash due to a known bug when using multi-threading in Python 3.8+ on macOS! For multi-threading please downgrade your Python to 3.7. Sorry for the inconvenience! Please find more details in https://github.com/ablab/quast/issues/175
+
+CWD: /Users/weeblesthe2nd/mtb_argentina_mdr
+Main parameters: 
+  MODE: default, threads: 1, min contig length: 500, min alignment length: 65, min alignment IDY: 95.0, \
+  ambiguity: one, min local misassembly length: 200, min extensive misassembly length: 1000
+
+Contigs:
+  Pre-processing...
+  spadesout_trimmed_strict/scaffolds.fasta ==> scaffolds
+
+2025-06-03 12:39:42
+Running Basic statistics processor...
+  Contig files: 
+    scaffolds
+  Calculating N50 and L50...
+    scaffolds, N50 = 81977, L50 = 17, auN = 93193.9, Total length = 4316523, GC % = 65.46, # N's per 100 kbp =  28.26
+  Drawing Nx plot...
+    saved to /Users/weeblesthe2nd/mtb_argentina_mdr/quast_trimmed_strict_argentina/basic_stats/Nx_plot.pdf
+  Drawing cumulative plot...
+    saved to /Users/weeblesthe2nd/mtb_argentina_mdr/quast_trimmed_strict_argentina/basic_stats/cumulative_plot.pdf
+  Drawing GC content plot...
+    saved to /Users/weeblesthe2nd/mtb_argentina_mdr/quast_trimmed_strict_argentina/basic_stats/GC_content_plot.pdf
+  Drawing scaffolds GC content plot...
+    saved to /Users/weeblesthe2nd/mtb_argentina_mdr/quast_trimmed_strict_argentina/basic_stats/scaffolds_GC_content_plot.pdf
+  Drawing Coverage histogram (bin size: 1x)...
+    saved to /Users/weeblesthe2nd/mtb_argentina_mdr/quast_trimmed_strict_argentina/basic_stats/coverage_histogram.pdf
+  Drawing scaffolds coverage histogram (bin size: 1x)...
+    saved to /Users/weeblesthe2nd/mtb_argentina_mdr/quast_trimmed_strict_argentina/basic_stats/scaffolds_coverage_histogram.pdf
+Done.
+
+NOTICE: Genes are not predicted by default. Use --gene-finding or --glimmer option to enable it.
+
+2025-06-03 12:39:43
+Creating large visual summaries...
+This may take a while: press Ctrl-C to skip this step..
+  1 of 2: Creating PDF with all tables and plots...
+  2 of 2: Creating Icarus viewers...
+Done
+
+2025-06-03 12:39:43
+RESULTS:
+  Text versions of total report are saved to /Users/weeblesthe2nd/mtb_argentina_mdr/quast_trimmed_strict_argentina/report.txt, report.tsv, and report.tex
+  Text versions of transposed total report are saved to /Users/weeblesthe2nd/mtb_argentina_mdr/quast_trimmed_strict_argentina/transposed_report.txt, transposed_report.tsv, and transposed_report.tex
+  HTML version (interactive tables and plots) is saved to /Users/weeblesthe2nd/mtb_argentina_mdr/quast_trimmed_strict_argentina/report.html
+  PDF version (tables and plots) is saved to /Users/weeblesthe2nd/mtb_argentina_mdr/quast_trimmed_strict_argentina/report.pdf
+  Icarus (contig browser) is saved to /Users/weeblesthe2nd/mtb_argentina_mdr/quast_trimmed_strict_argentina/icarus.html
+  Log is saved to /Users/weeblesthe2nd/mtb_argentina_mdr/quast_trimmed_strict_argentina/quast.log
+
+Finished: 2025-06-03 12:39:43
+Elapsed time: 0:00:01.063839
+NOTICEs: 1; WARNINGs: 1; non-fatal ERRORs: 0
+
+Thank you for using QUAST!

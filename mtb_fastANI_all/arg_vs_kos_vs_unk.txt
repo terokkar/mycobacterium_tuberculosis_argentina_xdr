@@ -1,0 +1,2 @@
+NODE_47_argentina.fasta	NODE_2_unknown.fasta	99.9711	8	9
+NODE_47_argentina.fasta	NODE_52_kosovo.fasta	99.9659	8	9

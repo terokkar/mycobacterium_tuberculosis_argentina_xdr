@@ -1,0 +1,394 @@
+Argentina XDR MTB
+https://www.ncbi.nlm.nih.gov/sra/ERX14341133
+
+#This marks the final analysis of Mycobacterium tuberculosis for this repository, completed during my undergraduate summer break in 2025. In this report, workflow improvements were made, and both gene and phage regions were annotated and compared to previous reports as well as the NCBI reference MTB genome (H37Rv). The consistent presence of the aminoglycoside resistance gene (aac(2')-Ic) near a phage region in all four genomes suggests this may represent a prophage integration event in MTB.
+
+#This file lists all tools and web resources used, along with their versions, for reproducibility.
+
+#Versions
+conda 23.7.4
+Shell environment: zsh 5.9 (macOS Darwin 24.0)
+fasterq-dump : 3.2.1
+FastQC v0.12.1
+fastp 0.23.4
+SPAdes genome assembler v4.1.0
+QUAST v5.3.0
+barrnap 0.9
+bedtools v2.31.1
+prokka 1.14.6
+Kraken2 (Galaxy EU Version 2.1.3+galaxy1)
+RAST (BV-BRC web version using BCV v3.49.1; accessed June 2025)
+RGI (Web portal – RGI 6.0.3, CARD 4.0.0)
+
+#Full NCBI SRA text:
+ERX14341133: Raw reads: 22372
+1 ILLUMINA (Illumina MiSeq) run: 3.6M spots, 1.1G bases, 646.5Mb downloads
+
+Design: unspecified
+Submitted by: UNIVERSIDAD DE BUENOS AIRES
+Study: This study investigates the genomic characteristics of extensively drug-resistant (XDR) Mycobacterium tuberculosis strains isolated in Argentina between 2006 and 2015. XDR TB, resistant to both first-line and second-line drugs, poses a significant health threat. By sequencing the genomes of clinical isolates, the study identifies mutations associated with drug resistance, maps genetic diversity, and examines the spread and transmission of resistant strains.
+PRJEB88787 • ERP171849 • All experiments • All runs
+hide Abstract
+Tuberculosis (TB), caused by the intracellular bacterium Mycobacterium tuberculosis (Mtb), remains a significant global health challenge, with Mtb being the second leading infectious killer worldwide, following COVID-19. Despite over a century of research, the disease continues to pose a major threat, with an estimated one-fourth of the global population latently infected. According to the World Health Organization (WHO), approximately 1.25 million deaths were attributed to TB in 2023 alone. The emergence of multidrug-resistant (MDR) strains, resistant to isoniazid and rifampin, and extensively drug-resistant (XDR) strains, resistant to isoniazid, rifampin, a fluoroquinolone, and a second-line injectable aminoglycoside, further complicates the situation, posing significant challenges for healthcare systems. In Argentina, TB burden is moderate compared to other countries, with approximately 10,500 new cases and 1,000 deaths reported annually. While standard therapy is generally effective, XDR Mtb infections require prolonged and costly treatment and are often associated with a guarded prognosis.
+Sample: Mycobacterium tuberculosis 22372
+SAMEA118214840 • ERS24286791 • All experiments • All runs
+Organism: Mycobacterium tuberculosis
+Library:
+Instrument: Illumina MiSeq
+Strategy: WGS
+Source: GENOMIC
+Selection: RANDOM
+Layout: PAIRED
+Runs: 1 run, 3.6M spots, 1.1G bases, 646.5Mb
+Run	# of Spots	# of Bases	Size	Published
+ERR14936891	3,558,712	1.1G	646.5Mb	2025-05-04
+
+ID: 38483976
+
+#SRA environment
+conda activate SRA
+
+#Make project folder
+mkdir -p mtb_argentina_mdr && cd mtb_argentina_mdr
+
+#Download paired-end reads
+fasterq-dump ERR14936891 --split-files --threads 8 -O .
+
+https://www.ncbi.nlm.nih.gov/sra/ERX14341133%5Baccn%5D
+
+spots read      : 3,558,712
+reads read      : 7,117,424
+reads written   : 7,117,424
+
+#FastQC
+mkdir -p fastqc_raw && fastqc ERR14936891_1.fastq ERR14936891_2.fastq -o fastqc_raw -t 8
+
+open fastqc_raw/ERR14936891_1_fastqc.html
+open fastqc_raw/ERR14936891_2_fastqc.html
+
+#SPAdes
+spades.py -1 ERR14936891_1.fastq -2 ERR14936891_2.fastq -o spadesout_raw -t 8
+
+#QUAST
+quast.py spadesout_raw/scaffolds.fasta -o quast_raw_argentina -t 8
+
+All statistics are based on contigs of size >= 500 bp, unless otherwise noted (e.g., "# contigs (>= 0 bp)" and "Total length (>= 0 bp)" include all contigs).
+
+Assembly                    scaffolds
+# contigs (>= 0 bp)         204      
+# contigs (>= 1000 bp)      93       
+# contigs (>= 5000 bp)      57       
+# contigs (>= 10000 bp)     54       
+# contigs (>= 25000 bp)     43       
+# contigs (>= 50000 bp)     30       
+Total length (>= 0 bp)      4397045  
+Total length (>= 1000 bp)   4351928  
+Total length (>= 5000 bp)   4279599  
+Total length (>= 10000 bp)  4260558  
+Total length (>= 25000 bp)  4078530  
+Total length (>= 50000 bp)  3571287  
+# contigs                   105      
+Largest contig              223014   
+Total length                4360503  
+GC (%)                      65.53    
+N50                         125880   
+N90                         37379    
+auN                         121082.3 
+L50                         13       
+L90                         39       
+# N's per 100 kbp           6.88   
+
+#Barrnap
+mkdir argentina_rRNA
+barrnap --kingdom bac spadesout_raw/scaffolds.fasta > argentina_rRNA/rRNA_annotations.gff
+
+#16S only
+grep "16S_rRNA" argentina_rRNA/rRNA_annotations.gff > argentina_rRNA/16S_only.gff
+
+#23S only
+grep "23S_rRNA" argentina_rRNA/rRNA_annotations.gff > argentina_rRNA/23S_only.gff
+
+#16S
+bedtools getfasta -fi spadesout_raw/scaffolds.fasta \
+  -bed argentina_rRNA/16S_only.gff \
+  -fo argentina_rRNA/16S_sequences.fasta
+
+#23S
+bedtools getfasta -fi spadesout_raw/scaffolds.fasta \
+  -bed argentina_rRNA/23S_only.gff \
+  -fo argentina_rRNA/23S_sequences.fasta
+
+mv argentina_rRNA ~/Desktop/
+ls ~/Desktop/argentina_rRNA
+
+#Copy forward read (R1)
+cp ~/mtb_argentina_mdr/ERR14936891_1.fastq ~/Desktop/mycobacterium_tuberculosis_argentina_xdr/
+
+#Copy reverse read (R2)
+cp ~/mtb_argentina_mdr/ERR14936891_2.fastq ~/Desktop/mycobacterium_tuberculosis_argentina_xdr/
+
+#RAST
+Genome ID - Name:	6666666.1452318 - Mycobacterium tuberculosis
+Job:	#1613488
+User:	terokkar
+Date:	Mon Jun 2 21:58:20 2025
+Genetic code:	11
+Annotation scheme:	RASTtk
+Preserve gene calls:	no
+Automatically fix errors:	yes
+Fix frameshifts:	no
+Backfill gaps:	yes
+
+#Prokka (because RAST is down)
+prokka spadesout_raw/scaffolds.fasta --outdir prokka_out --prefix argentina --cpus 8
+
+#CARD
+NODE_42_length_27018_cov_74.416608	5955	6500	-	Perfect	300	375.6	AAC(2')-Ic	100.0	3002525	protein homolog model	n/a	n/a	aminoglycoside antibiotic	antibiotic inactivation	AAC(2')
+
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	5955	6500	.	-	0	ID=AMANMOLG_03803;eC_number=2.3.1.-;Name=aac;gene=aac;inference=ab initio prediction:Prodigal:002006,similar to AA sequence:UniProtKB:P9WQG9;locus_tag=AMANMOLG_03803;product=Aminoglycoside 2'-N-acetyltransferase
+
+#Prokka grep
+grep NODE_42 argentina.gff
+
+##sequence-region NODE_42_length_27018_cov_74.416608 1 27018
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	793	897	.	+	0	ID=AMANMOLG_03798;inference=ab initio prediction:Prodigal:002006;locus_tag=AMANMOLG_03798;product=hypothetical protein
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	1940	2395	.	-	0	ID=AMANMOLG_03799;inference=ab initio prediction:Prodigal:002006;locus_tag=AMANMOLG_03799;product=hypothetical protein
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	2420	3163	.	-	0	ID=AMANMOLG_03800;inference=ab initio prediction:Prodigal:002006;locus_tag=AMANMOLG_03800;product=hypothetical protein
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	3160	4305	.	-	0	ID=AMANMOLG_03801;inference=ab initio prediction:Prodigal:002006;locus_tag=AMANMOLG_03801;product=hypothetical protein
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	4405	5814	.	-	0	ID=AMANMOLG_03802;Name=narK_2;db_xref=COG:COG2223;gene=narK_2;inference=ab initio prediction:Prodigal:002006,similar to AA sequence:UniProtKB:P10903;locus_tag=AMANMOLG_03802;product=Nitrate/nitrite transporter NarK
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	5955	6500	.	-	0	ID=AMANMOLG_03803;eC_number=2.3.1.-;Name=aac;gene=aac;inference=ab initio prediction:Prodigal:002006,similar to AA sequence:UniProtKB:P9WQG9;locus_tag=AMANMOLG_03803;product=Aminoglycoside 2'-N-acetyltransferase
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	6510	7412	.	-	0	ID=AMANMOLG_03804;eC_number=3.5.2.9;Name=pxpC;db_xref=COG:COG1984;gene=pxpC;inference=ab initio prediction:Prodigal:002006,similar to AA sequence:UniProtKB:P75745;locus_tag=AMANMOLG_03804;product=5-oxoprolinase subunit C
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	7429	8082	.	-	0	ID=AMANMOLG_03805;eC_number=3.5.2.9;Name=pxpB;db_xref=COG:COG2049;gene=pxpB;inference=ab initio prediction:Prodigal:002006,similar to AA sequence:UniProtKB:P0AAV4;locus_tag=AMANMOLG_03805;product=5-oxoprolinase subunit B
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	8157	9149	.	-	0	ID=AMANMOLG_03806;inference=ab initio prediction:Prodigal:002006;locus_tag=AMANMOLG_03806;product=hypothetical protein
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	9171	12800	.	-	0	ID=AMANMOLG_03807;inference=ab initio prediction:Prodigal:002006;locus_tag=AMANMOLG_03807;product=hypothetical protein
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	12977	14368	.	+	0	ID=AMANMOLG_03808;Name=narK_3;db_xref=COG:COG2223;gene=narK_3;inference=ab initio prediction:Prodigal:002006,similar to AA sequence:UniProtKB:P10903;locus_tag=AMANMOLG_03808;product=Nitrate/nitrite transporter NarK
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	14410	14667	.	-	0	ID=AMANMOLG_03809;inference=ab initio prediction:Prodigal:002006;locus_tag=AMANMOLG_03809;product=hypothetical protein
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	14984	16177	.	-	0	ID=AMANMOLG_03810;inference=ab initio prediction:Prodigal:002006;locus_tag=AMANMOLG_03810;product=hypothetical protein
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	16213	17895	.	+	0	ID=AMANMOLG_03811;eC_number=6.2.1.3;Name=lcfB_4;db_xref=COG:COG0318;gene=lcfB_4;inference=ab initio prediction:Prodigal:002006,similar to AA sequence:UniProtKB:O07610;locus_tag=AMANMOLG_03811;product=Long-chain-fatty-acid--CoA ligase
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	17912	20107	.	-	0	ID=AMANMOLG_03812;eC_number=1.3.99.-;inference=ab initio prediction:Prodigal:002006,similar to AA sequence:UniProtKB:P96855;locus_tag=AMANMOLG_03812;product=Acyl-CoA dehydrogenase FadE34
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	20221	21354	.	-	0	ID=AMANMOLG_03813;inference=ab initio prediction:Prodigal:002006;locus_tag=AMANMOLG_03813;product=hypothetical protein
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	21351	21971	.	-	0	ID=AMANMOLG_03814;inference=ab initio prediction:Prodigal:002006;locus_tag=AMANMOLG_03814;product=hypothetical protein
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	22068	22649	.	+	0	ID=AMANMOLG_03815;inference=ab initio prediction:Prodigal:002006;locus_tag=AMANMOLG_03815;product=hypothetical protein
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	22579	23313	.	-	0	ID=AMANMOLG_03816;inference=ab initio prediction:Prodigal:002006;locus_tag=AMANMOLG_03816;product=hypothetical protein
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	23394	24314	.	+	0	ID=AMANMOLG_03817;db_xref=COG:COG3662;inference=ab initio prediction:Prodigal:002006,similar to AA sequence:UniProtKB:P9WLH1;locus_tag=AMANMOLG_03817;product=putative protein
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	24354	24782	.	-	0	ID=AMANMOLG_03818;eC_number=3.1.-.-;inference=ab initio prediction:Prodigal:002006,similar to AA sequence:UniProtKB:P9WF85;locus_tag=AMANMOLG_03818;product=Ribonuclease VapC25
+NODE_42_length_27018_cov_74.416608	Prodigal:002006	CDS	25083	26762	.	-	0	ID=AMANMOLG_03819;inference=ab initio prediction:Prodigal:002006;locus_tag=AMANMOLG_03819;product=hypothetical protein
+>NODE_42_length_27018_cov_74.416608 
+
+#RAST
+NODE_42_length_27018_cov_74.416608	FIG	CDS	14410	14667	.	-	1	ID=fig|6666666.1452318.peg.3035;Name=Phage protein
+
+~8k apart like unknown MTB
+
+#fastp to trim low quality regions of the SRA reads including adapters and areas where read quality drops below Q20 according to FastQC reports.
+fastp \
+  -i ERR14936891_1.fastq \
+  -I ERR14936891_2.fastq \
+  -o fastp/ERR14936891_trimmed_1.fastq \
+  -O fastp/ERR14936891_trimmed_2.fastq \
+  -h fastp/fastp_argentina.html \
+  -j fastp/fastp_argentina.json \
+  --trim_front1 15 \
+  --trim_front2 15 \
+  --qualified_quality_phred 20 \
+  --cut_mean_quality 20 \
+  --cut_front \
+  --cut_tail \
+  --length_required 50 \
+  -w 8
+
+#The Kraken2 report shows minimal contamination, but the read quality was flagged and the contig count is high. These factors led me to the decision to trim the SRA reads.
+
+#FastQC
+mkdir -p fastqc_trimmed_argentina && fastqc fastp/ERR14936891_trimmed_1.fastq fastp/ERR14936891_trimmed_2.fastq -o fastqc_trimmed_argentina -t 8
+
+#Read quality improved, but not perfect.
+
+spades.py \
+  -1 fastp/ERR14936891_trimmed_1.fastq \
+  -2 fastp/ERR14936891_trimmed_2.fastq \
+  -o spadesout_trimmed_argentina \
+  -t 8
+
+#SPAdes finished and QUAST was run on assembly. Because of the high number of contigs and less than ideal FastQC report, more aggressive trimming was applied to SRA reads.
+quast.py spadesout_trimmed_argentina/scaffolds.fasta -o quast_trimmed_argentina -t 8
+
+All statistics are based on contigs of size >= 500 bp, unless otherwise noted (e.g., "# contigs (>= 0 bp)" and "Total length (>= 0 bp)" include all contigs).
+
+Assembly                    scaffolds
+# contigs (>= 0 bp)         296      
+# contigs (>= 1000 bp)      107      
+# contigs (>= 5000 bp)      73       
+# contigs (>= 10000 bp)     68       
+# contigs (>= 25000 bp)     50       
+# contigs (>= 50000 bp)     32       
+Total length (>= 0 bp)      4373609  
+Total length (>= 1000 bp)   4304335  
+Total length (>= 5000 bp)   4235835  
+Total length (>= 10000 bp)  4205114  
+Total length (>= 25000 bp)  3896195  
+Total length (>= 50000 bp)  3203807  
+# contigs                   129      
+Largest contig              222914   
+Total length                4320010  
+GC (%)                      65.46    
+N50                         80678    
+N90                         27038    
+auN                         98401.7  
+L50                         17       
+L90                         50       
+# N's per 100 kbp           39.58    
+
+#fastp aggressive
+mkdir -p fastp_strict && fastp \
+  -i ERR14936891_1.fastq \
+  -I ERR14936891_2.fastq \
+  -o fastp_strict/ERR14936891_trimmed_1.fastq \
+  -O fastp_strict/ERR14936891_trimmed_2.fastq \
+  -h fastp_strict/fastp_argentina_strict.html \
+  -j fastp_strict/fastp_argentina_strict.json \
+  --trim_front1 20 \
+  --trim_front2 20 \
+  --trim_tail1 30 \
+  --trim_tail2 30 \
+  --qualified_quality_phred 25 \
+  --cut_mean_quality 25 \
+  --cut_front \
+  --cut_tail \
+  --length_required 60 \
+  -w 8
+
+#FastQC
+mkdir -p fastqc_strict_argentina && fastqc \
+  fastp_strict/ERR14936891_trimmed_1.fastq \
+  fastp_strict/ERR14936891_trimmed_2.fastq \
+  -o fastqc_strict_argentina \
+  -t 8
+
+#SPAdes
+spades.py \
+  -1 fastp_strict/ERR14936891_trimmed_1.fastq \
+  -2 fastp_strict/ERR14936891_trimmed_2.fastq \
+  -o spadesout_trimmed_strict \
+  -t 8
+
+#QUAST
+quast.py spadesout_trimmed_strict/scaffolds.fasta -o quast_trimmed_strict_argentina -t 8
+
+#RAST
+Genome ID - Name:	6666666.1452481 - Mycobacterium tuberculosis
+Job:	#1613907
+User:	terokkar
+Date:	Wed Jun 4 17:47:31 2025
+Genetic code:	11
+Annotation scheme:	RASTtk
+Preserve gene calls:	no
+Automatically fix errors:	yes
+Fix frameshifts:	no
+Backfill gaps:	yes
+
+#CARD
+NODE_47_length_28227_cov_59.940284_6 # 5899 # 6444 # -1 # ID=47_6;partial=00;start_type=GTG;rbs_motif=GGA/GAG/AGG;rbs_spacer=3-4bp;gc_cont=0.679	NODE_47_length_28227_cov_59.940284	5899	6444	-	Perfect	300	375.6	AAC(2')-Ic	100.0	3002525	protein homolog model	n/a	n/a	aminoglycoside antibiotic	antibiotic inactivation	AAC(2')	
+
+#RAST
+NODE_47_length_28227_cov_59.940284	FIG	CDS	14354	14611	.	ID=fig|6666666.1452481.peg.3186;Name=Phage protein
+
+#The phage region and resistance gene remain ~8k away from each other on the same node.
+#Trimming did result in improved QUAST stats but unchanged results for this report.
+
+#NODE 47 extraction
+
+#Extract full NODE_47 sequence
+awk '/^>NODE_47_length_28227_cov_59.940284/,/^>NODE_48/ {print}' spadesout_trimmed_strict/scaffolds.fasta > NODE_47.fasta
+
+#Extract ~11.5 kb subregion (5,000–16,500) that includes:
+The AAC(2')-Ic gene (5899–6444)
+The phage protein (14354–14611)
+
+#Node 47 subregion was run through BLASTn with default settings.
+Top hits: Mycobacterium tuberculosis
+
+#FASTANI
+A copy of NODE 47 was moved to a local folder called mycobacterium_fastANI_all along with a copy of the unknown source mtb NODE 2 for comparison.
+fastANI --query NODE_47_argentina.fasta \
+        --ref NODE_2_unknown.fasta \
+        --output argentina_vs_unknown.txt
+
+#FastANI
+NODE_47_argentina.fasta	NODE_2_unknown.fasta	99.9711	8	9
+
+#Kosovo mtb Node 52 and a subregion were extracted
+
+#Extract the full node (NODE_52)
+awk '/^>NODE_52_length_26777_cov_24.745640/,/^>NODE_53/' kosovo_spades/scaffolds.fasta > NODE_52_kosovo.fasta
+
+awk '/^>NODE_52_length_26777_cov_24.745640/,/^>NODE_53/' kosovo_spades/scaffolds.fasta | \
+grep -v ">" | tr -d '\n' | cut -c11500-21500 | fold -w 80 | \
+awk 'BEGIN {print ">NODE_52_kosovo_subregion_11.5k_21.5k"} {print}' > NODE_52_kosovo_subregion.fasta
+
+#Reference list for all three
+echo NODE_2_unknown.fasta > ref_list.txt
+echo NODE_52_kosovo.fasta >> ref_list.txt
+
+#FastANI
+fastANI --query NODE_47_argentina.fasta \
+        --refList ref_list.txt \
+        --output arg_vs_kos_vs_unk.txt
+
+NODE_47_argentina.fasta	NODE_2_unknown.fasta	99.9711	8	9
+NODE_47_argentina.fasta	NODE_52_kosovo.fasta	99.9659	8	9
+
+#Kosovo vs unknown
+fastANI --query NODE_52_kosovo.fasta \
+        --ref NODE_2_unknown.fasta \
+        --output kosovo_vs_unknown.txt
+NODE_52_kosovo.fasta	NODE_2_unknown.fasta	99.9815	7	8
+
+#mycobacterium_fastANI_all was moved to the main folder of this report.
+
+#REFERENCE RAST AND CARD
+
+#Reference mtb uploaded to RAAST
+Genome ID - Name:	6666666.1455213 - Mycobacterium tuberculosis
+Job:	#1618391
+User:	terokkar
+Date:	Mon Jun 30 12:59:27 2025
+Genetic code:	11
+Annotation scheme:	RASTtk
+Preserve gene calls:	no
+Automatically fix errors:	yes
+Fix frameshifts:	no
+Backfill gaps:	yes
+
+(genomeanalysis) weeblesthe2nd@WeeblesThe2nd tooobey reference % grep "AAC(2')" *.txt
+
+AL123456.3_279 # 314309 # 314854 # -1 # ID=1_279;partial=00;start_type=GTG;rbs_motif=None;rbs_spacer=None;gc_cont=0.679	AL123456.3	314309	314854	-	Perfect	300	375.6	AAC(2')-Ic	100.0	3002525	protein homolog model	n/a	n/a	aminoglycoside antibiotic	antibiotic inactivation	AAC(2')GTGCACACCCAGGTACACACGGCCCGCCTGGTCCACACCGCCGATCTTGACAGCGAGACCCGCCAGGACATCCGTCAGATGGTCACCGGCGCGTTTGCCGGTGACTTCACCGAGACCGACTGGGAGCACACGCTGGGTGGGATGCACGCCCTGATCTGGCATCACGGGGCGATCATCGCGCATGCCGCGGTGATCCAGCGGCGACTGATCTACCGCGGCAACGCGCTGCGCTGCGGGTACGTCGAAGGCGTTGCGGTGCGGGCGGACTGGCGGGGCCAACGCCTGGTGAGCGCGCTGTTGGACGCCGTCGAGCAGGTGATGCGCGGCGCTTACCAGCTCGGAGCGCTCAGTTCCTCGGCGCGGGCCCGCAGACTGTACGCCTCACGCGGCTGGCTGCCCTGGCACGGCCCGACATCGGTACTGGCACCAACCGGTCCAGTCCGTACACCCGATGACGACGGAACGGTGTTCGTCCTGCCCATCGACATCAGCCTGGACACCTCGGCGGAGCTGATGTGCGATTGGCGCGCGGGCGACGTCTGGTAA	MHTQVHTARLVHTADLDSETRQDIRQMVTGAFAGDFTETDWEHTLGGMHALIWHHGAIIAHAAVIQRRLIYRGNALRCGYVEGVAVRADWRGQRLVSALLDAVEQVMRGAYQLGALSSSARARRLYASRGWLPWHGPTSVLAPTGPVRTPDDDGTVFVLPIDISLDTSAELMCDWRAGDVW	MHTQVHTARLVHTADLDSETRQDIRQMVTGAFAGDFTETDWEHTLGGMHALIWHHGAIIAHAAVIQRRLIYRGNALRCGYVEGVAVRADWRGQRLVSALLDAVEQVMRGAYQLGALSSSARARRLYASRGWLPWHGPTSVLAPTGPVRTPDDDGTVFVLPIDISLDTSAELMCDWRAGDVW	100.00	gnl|BL_ORD_ID|1139|hsp_num:0	1246			0	543	dibekacin; netilmicin; tobramycin; 6'-N-ethylnetilmicin; gentamicin	
+
+#RAST
+grep -E '31430[0-9]|3148[0-9]{2}' RASTreference.gff
+
+AL123456.3	FIG	CDS	314309	314854	.	-	2	ID=fig|6666666.1455213.peg.286;Name=Aminoglycoside 2'-N-acetyltransferase (EC 2.3.1.59) > AAC(2')-I;Ontology_term=KEGG_ENZYME:2.3.1.59
+AL123456.3	FIG	CDS	314864	315766	.	-	2	ID=fig|6666666.1455213.peg.287;Name=Allophanate hydrolase 2 subunit 2 (EC 3.5.1.54);Ontology_term=KEGG_ENZYME:3.5.1.54
+AL123456.3	FIG	CDS	2314661	2314825	.	-	2	ID=fig|6666666.1455213.peg.2236;Name=LSU ribosomal protein L33p @ LSU ribosomal protein L33p%2C zinc-independent
+AL123456.3	FIG	CDS	2314825	2315061	.	-	1	ID=fig|6666666.1455213.peg.2237;Name=LSU ribosomal protein L28p @ LSU ribosomal protein L28p%2C zinc-independent
+AL123456.3	FIG	CDS	3147959	3148225	.	-	2	ID=fig|6666666.1455213.peg.3088;Name=COG2740: Predicted nucleic-acid-binding protein implicated in transcription termination
+AL123456.3	FIG	CDS	3148385	3149428	.	-	2	ID=fig|6666666.1455213.peg.3089;Name=Transcription termination protein NusA
+
+#Searching for phage regions close to the AB gene in the RAST gff
+awk '$4 >= 300000 && $5 <= 330000' RASTreference.gff | grep -i 'phage'
+
+AL123456.3	FIG	CDS	322764	323021	.	-	0	ID=fig|6666666.1455213.peg.292;Name=Phage protein
+
+#AB and phage are ~8 k bp apart
+
+#Extraction of Node containing AB and phage
+grep -v ">" GCF_000195955.2_ASM19595v2_genomic.fna | tr -d '\n' | cut -c312000-324000 | fold -w 80 | \
+awk 'BEGIN {print ">H37Rv_resistance_phage_region_312k_324k"} {print}' > H37Rv_resistance_phage_region.fasta
+
+#The reference Mycobacterium tuberculosis genome (H37Rv) from NCBI contains the AAC(2')-Ic aminoglycoside resistance gene and a phage region approximately 8k bp apart. Because three separate genomes across the globe contained this AB gene and phage region in the same location or 8k bp apart, I think it's safe to say this is a prophage integration into the genome of mtb.
+This ends my Mycobacterium tuberculosis analysis for the repository. I will either work on more Mycobacterium species or Pseudomonas (in preparation of honors capstone work). Please stay tuned. 
+Thank you for reading.
+
+- HAM
+
+June 30, 2025 ~ 
