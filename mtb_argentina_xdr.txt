@@ -1,4 +1,4 @@
-Argentina XDR MTB
+xArgentina XDR MTB
 https://www.ncbi.nlm.nih.gov/sra/ERX14341133
 
 #This marks the final analysis of Mycobacterium tuberculosis for this repository, completed during my undergraduate summer break in 2025. In this report, workflow improvements were made, and both gene and phage regions were annotated and compared to previous reports as well as the NCBI reference MTB genome (H37Rv). The consistent presence of the aminoglycoside resistance gene (aac(2')-Ic) near a phage region in all four genomes suggests this may represent a prophage integration event in MTB.
@@ -386,7 +386,7 @@ grep -v ">" GCF_000195955.2_ASM19595v2_genomic.fna | tr -d '\n' | cut -c312000-3
 awk 'BEGIN {print ">H37Rv_resistance_phage_region_312k_324k"} {print}' > H37Rv_resistance_phage_region.fasta
 
 #The reference Mycobacterium tuberculosis genome (H37Rv) from NCBI contains the AAC(2')-Ic aminoglycoside resistance gene and a phage region approximately 8k bp apart. Because three separate genomes across the globe contained this AB gene and phage region in the same location or 8k bp apart, I think it's safe to say this is a prophage integration into the genome of mtb.
-This ends my Mycobacterium tuberculosis analysis for the repository. I will either work on more Mycobacterium species or Pseudomonas (in preparation of honors capstone work). Please stay tuned. 
+This ends my Mycobacterium tuberculosis analysis for the repository. Please stay tuned for more Mycobacterium sp. analyses. 
 Thank you for reading.
 
 - HAM
